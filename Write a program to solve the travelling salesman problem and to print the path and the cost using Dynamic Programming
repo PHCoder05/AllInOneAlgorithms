@@ -1,0 +1,84 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
+
+// Function to solve TSP using Dynamic Programming
+pair<int, vector<int>> tsp(const vector<vector<int>>& dist) {
+    int n = dist.size();
+    // Create a DP table
+    vector<vector<int>> dp(1 << n, vector<int>(n, INF));
+    dp[1][0] = 0; // Starting at city 0
+
+    // Iterate through all subsets of cities
+    for (int mask = 1; mask < (1 << n); ++mask) {
+        for (int u = 0; u < n; ++u) {
+            if (!(mask & (1 << u))) continue; // u must be in the subset
+            for (int v = 0; v < n; ++v) {
+                if (mask & (1 << v) && u != v) {
+                    dp[mask][u] = min(dp[mask][u], dp[mask ^ (1 << u)][v] + dist[v][u]);
+                }
+            }
+        }
+    }
+
+    // Find the minimum cost and reconstruct the path
+    int minCost = INF;
+    int lastCity = -1;
+    int finalMask = (1 << n) - 1; // All cities visited
+
+    for (int u = 1; u < n; ++u) {
+        if (dp[finalMask][u] + dist[u][0] < minCost) {
+            minCost = dp[finalMask][u] + dist[u][0];
+            lastCity = u;
+        }
+    }
+
+    // Reconstruct the path
+    vector<int> path;
+    int mask = finalMask;
+
+    for (int i = 0; i < n; ++i) {
+        path.push_back(lastCity);
+        int prevMask = mask ^ (1 << lastCity);
+        for (int v = 0; v < n; ++v) {
+            if (prevMask & (1 << v) && dp[mask][lastCity] == dp[prevMask][v] + dist[v][lastCity]) {
+                lastCity = v;
+                break;
+            }
+        }
+        mask = prevMask;
+    }
+
+    path.push_back(0); // Return to the starting city
+    reverse(path.begin(), path.end());
+
+    return {minCost, path};
+}
+
+int main() {
+    // Distance matrix for the cities
+    vector<vector<int>> dist = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+
+    auto [cost, path] = tsp(dist);
+
+    // Output the results
+    cout << "Minimum cost: " << cost << endl;
+    cout << "Path: ";
+    for (int city : path) {
+        cout << city << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
