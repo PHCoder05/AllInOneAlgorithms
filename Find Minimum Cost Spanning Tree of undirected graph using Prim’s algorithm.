@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
+
+// Function to perform Prim's algorithm to find the MST
+void primMST(int V, const vector<vector<int>>& graph) {
+    vector<int> key(V, INF);         // Store the minimum weight edge for each vertex
+    vector<int> parent(V, -1);       // Store the parent of each vertex in the MST
+    vector<bool> inMST(V, false);    // Track vertices included in the MST
+
+    // Min-Heap to select the edge with the smallest weight
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minHeap;
+
+    // Start from the first vertex (0)
+    key[0] = 0;
+    minHeap.push({0, 0}); // (weight, vertex)
+
+    while (!minHeap.empty()) {
+        int u = minHeap.top().second; // Get the vertex with the minimum key
+        minHeap.pop();
+        inMST[u] = true; // Include this vertex in MST
+
+        // Update the keys of adjacent vertices
+        for (int v = 0; v < V; ++v) {
+            if (graph[u][v] != 0 && !inMST[v] && graph[u][v] < key[v]) {
+                key[v] = graph[u][v];
+                parent[v] = u;
+                minHeap.push({key[v], v});
+            }
+        }
+    }
+
+    // Output the edges in the MST
+    cout << "Edges in the Minimum Cost Spanning Tree:\n";
+    int totalCost = 0;
+    for (int i = 1; i < V; ++i) {
+        cout << parent[i] << " - " << i << " : " << graph[parent[i]][i] << endl;
+        totalCost += graph[parent[i]][i];
+    }
+    cout << "Total Cost: " << totalCost << endl;
+}
+
+int main() {
+    int V = 5; // Number of vertices
+    // Adjacency matrix representation of the graph
+    vector<vector<int>> graph = {
+        {0, 2, 0, 6, 0},
+        {2, 0, 3, 8, 5},
+        {0, 3, 0, 0, 7},
+        {6, 8, 0, 0, 9},
+        {0, 5, 7, 9, 0}
+    };
+
+    primMST(V, graph);
+
+    return 0;
+}
