@@ -1,0 +1,70 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// Function to check if a queen can be placed at board[row][col]
+bool isSafe(const vector<vector<int>>& board, int row, int col, int n) {
+    // Check this column on upper side
+    for (int i = 0; i < row; i++) {
+        if (board[i][col] == 1) return false;
+    }
+    // Check upper diagonal on left side
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+        if (board[i][j] == 1) return false;
+    }
+    // Check upper diagonal on right side
+    for (int i = row, j = col; i >= 0 && j < n; i--, j++) {
+        if (board[i][j] == 1) return false;
+    }
+    return true;
+}
+
+// Recursive function to solve the N-Queens problem
+bool solveNQueensUtil(vector<vector<int>>& board, int row, int n) {
+    // If all queens are placed, return true
+    if (row >= n) return true;
+
+    for (int col = 0; col < n; col++) {
+        // Check if it's safe to place the queen
+        if (isSafe(board, row, col, n)) {
+            board[row][col] = 1; // Place the queen
+
+            // Recur to place the rest of the queens
+            if (solveNQueensUtil(board, row + 1, n)) return true;
+
+            // If placing queen doesn't lead to a solution, backtrack
+            board[row][col] = 0; // Remove the queen (backtrack)
+        }
+    }
+    return false;
+}
+
+// Function to print the chessboard
+void printBoard(const vector<vector<int>>& board) {
+    for (const auto& row : board) {
+        for (int cell : row) {
+            cout << (cell ? " Q " : " . ");
+        }
+        cout << endl;
+    }
+}
+
+void solveNQueens(int n) {
+    vector<vector<int>> board(n, vector<int>(n, 0)); // Create an n x n board
+
+    if (solveNQueensUtil(board, 0, n)) {
+        printBoard(board);
+    } else {
+        cout << "No solution exists for " << n << " queens." << endl;
+    }
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of queens (n): ";
+    cin >> n;
+
+    solveNQueens(n);
+    return 0;
+}
