@@ -1,0 +1,108 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
+
+class TSP {
+public:
+    TSP(int n) : n(n), minCost(INF) {
+        cost.resize(n, vector<int>(n));
+        visited.resize(n, false);
+    }
+
+    void inputCostMatrix() {
+        cout << "Enter the cost matrix (" << n << "x" << n << "):" << endl;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                cin >> cost[i][j];
+            }
+        }
+    }
+
+    void solve() {
+        visited[0] = true; // Start from the first city
+        currentPath.push_back(0);
+        branchAndBound(0, 0, 1);
+    }
+
+    void printResult() {
+        cout << "Minimum cost: " << minCost << endl;
+        cout << "Path: ";
+        for (int city : bestPath) {
+            cout << city << " ";
+        }
+        cout << endl;
+    }
+
+private:
+    int n;
+    vector<vector<int>> cost;
+    vector<bool> visited;
+    vector<int> currentPath;
+    vector<int> bestPath;
+    int minCost;
+
+    int calculateLowerBound(int currentCost, int level) {
+        int lowerBound = currentCost;
+
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                int minEdge = INF;
+                for (int j = 0; j < n; j++) {
+                    if (!visited[j] && cost[i][j] < minEdge) {
+                        minEdge = cost[i][j];
+                    }
+                }
+                if (minEdge != INF) {
+                    lowerBound += minEdge;
+                }
+            }
+        }
+
+        return lowerBound;
+    }
+
+    void branchAndBound(int currentCity, int currentCost, int level) {
+        if (level == n) {
+            int totalCost = currentCost + cost[currentCity][0]; // Return to start
+            if (totalCost < minCost) {
+                minCost = totalCost;
+                bestPath = currentPath; // Store the best path found
+                bestPath.push_back(0); // Return to start
+            }
+            return;
+        }
+
+        for (int nextCity = 0; nextCity < n; nextCity++) {
+            if (!visited[nextCity] && cost[currentCity][nextCity] != INF) {
+                visited[nextCity] = true;
+                currentPath.push_back(nextCity);
+                int newCost = currentCost + cost[currentCity][nextCity];
+
+                int lowerBound = calculateLowerBound(newCost, level);
+                if (lowerBound < minCost) {
+                    branchAndBound(nextCity, newCost, level + 1);
+                }
+
+                visited[nextCity] = false;
+                currentPath.pop_back();
+            }
+        }
+    }
+};
+
+int main() {
+    int n;
+    cout << "Enter the number of cities: ";
+    cin >> n;
+
+    TSP tsp(n);
+    tsp.inputCostMatrix();
+    tsp.solve();
+    tsp.printResult();
+
+    return 0;
+}
