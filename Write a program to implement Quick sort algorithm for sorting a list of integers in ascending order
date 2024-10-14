@@ -1,0 +1,37 @@
+#include <iostream>
+#include <vector>
+
+void quickSort(std::vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int pivot = arr[right]; // Choose the rightmost element as the pivot
+        int i = left - 1; // Pointer for the smaller element
+
+        for (int j = left; j < right; j++) {
+            // If current element is smaller than or equal to pivot
+            if (arr[j] <= pivot) {
+                i++; // Increment index of smaller element
+                std::swap(arr[i], arr[j]); // Swap
+            }
+        }
+        std::swap(arr[i + 1], arr[right]); // Swap pivot to the correct position
+        int partitionIndex = i + 1; // Partition index
+
+        // Recursively sort elements before and after partition
+        quickSort(arr, left, partitionIndex - 1);
+        quickSort(arr, partitionIndex + 1, right);
+    }
+}
+
+int main() {
+    std::vector<int> arr = {3, 6, 8, 10, 1, 2, 1};
+    
+    quickSort(arr, 0, arr.size() - 1);
+    
+    std::cout << "Sorted array: ";
+    for (int num : arr) {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
